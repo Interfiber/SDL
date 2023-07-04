@@ -101,7 +101,7 @@ int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *button
         /* const casting argv is fine:
          * https://pubs.opengroup.org/onlinepubs/9699919799/functions/fexecve.html -> rational
          */
-        execvp("zenity", (char **)argv);
+        execvp("yad", (char **)argv);
         _exit(129);
     } else if (pid1 < 0) {
         close(fd_pipe[0]);
@@ -177,13 +177,13 @@ int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *button
                     SDL_free(output);
                     return 0; /* success! */
                 } else {
-                    return SDL_SetError("zenity reported error or failed to launch: %d", WEXITSTATUS(status));
+                    return SDL_SetError("yad reported error or failed to launch: %d", WEXITSTATUS(status));
                 }
             } else {
-                return SDL_SetError("zenity failed for some reason");
+                return SDL_SetError("yad failed for some reason");
             }
         } else {
-            return SDL_SetError("Waiting on zenity failed: %s", strerror(errno));
+            return SDL_SetError("Waiting on yad failed: %s", strerror(errno));
         }
     }
 }
