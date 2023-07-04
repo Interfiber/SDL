@@ -51,7 +51,7 @@ int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *button
     if (pid1 == 0) { /* child process */
         int argc = 5, i;
         const char *argv[5 + 2 /* icon name */ + 2 /* title */ + 2 /* message */ + 2 * MAX_BUTTONS + 1 /* NULL */] = {
-            "zenity", "--question", "--switch", "--no-wrap", "--no-markup"
+            "yad", "--question", "--switch", "--no-wrap", "--no-markup"
         };
 
         close(fd_pipe[0]); /* no reading from pipe */
@@ -90,10 +90,10 @@ int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *button
 
         for (i = 0; i < messageboxdata->numbuttons; ++i) {
             if (messageboxdata->buttons[i].text && messageboxdata->buttons[i].text[0]) {
-                argv[argc++] = "--extra-button";
+                argv[argc++] = "--button";
                 argv[argc++] = messageboxdata->buttons[i].text;
             } else {
-                argv[argc++] = "--extra-button=\"\"";
+                argv[argc++] = "--button=\"\"";
             }
         }
         argv[argc] = NULL;
