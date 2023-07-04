@@ -164,15 +164,8 @@ int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *button
                         *tmp = '\0';
                     }
 
-                    /* Check which button got pressed */
-                    for (i = 0; i < messageboxdata->numbuttons; i += 1) {
-                        if (messageboxdata->buttons[i].text != NULL) {
-                            if (SDL_strcmp(output, messageboxdata->buttons[i].text) == 0) {
-                                *buttonid = messageboxdata->buttons[i].buttonid;
-                                break;
-                            }
-                        }
-                    }
+                    /* Check which button got pressed, in YAD this is the exit code */
+                    *buttonid = status;
 
                     SDL_free(output);
                     return 0; /* success! */
