@@ -23,12 +23,12 @@
 
 #ifdef SDL_VIDEO_DRIVER_WAYLAND
 
-#include <stdlib.h>   /* fgets */
-#include <stdio.h>    /* FILE, STDOUT_FILENO, fdopen, fclose */
-#include <unistd.h>   /* pid_t, pipe, fork, close, dup2, execvp, _exit */
-#include <sys/wait.h> /* waitpid, WIFEXITED, WEXITSTATUS */
-#include <string.h>   /* strerr */
 #include <errno.h>
+#include <stdio.h>    /* FILE, STDOUT_FILENO, fdopen, fclose */
+#include <stdlib.h>   /* fgets */
+#include <string.h>   /* strerr */
+#include <sys/wait.h> /* waitpid, WIFEXITED, WEXITSTATUS */
+#include <unistd.h>   /* pid_t, pipe, fork, close, dup2, execvp, _exit */
 
 #include "SDL_waylandmessagebox.h"
 
@@ -112,62 +112,8 @@ int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *button
         if (waitpid(pid1, &status, 0) == pid1) {
             if (WIFEXITED(status)) {
                 if (WEXITSTATUS(status) < 128) {
-                    int i;
-                    size_t output_len = 1;
-                    char *output = NULL;
-                    char *tmp = NULL;
-                    FILE *outputfp = NULL;
-
-                    close(fd_pipe[1]); /* no writing to pipe */
-                    /* At this point, if no button ID is needed, we can just bail as soon as the
-                     * process has completed.
-                     */
-                    if (buttonid == NULL) {
-                        close(fd_pipe[0]);
-                        return 0;
-                    }
-                    *buttonid = -1;
-
-                    /* find button with longest text */
-                    for (i = 0; i < messageboxdata->numbuttons; ++i) {
-                        if (messageboxdata->buttons[i].text != NULL) {
-                            const size_t button_len = SDL_strlen(messageboxdata->buttons[i].text);
-                            if (button_len > output_len) {
-                                output_len = button_len;
-                            }
-                        }
-                    }
-                    output = SDL_malloc(output_len + 1);
-                    if (output == NULL) {
-                        close(fd_pipe[0]);
-                        return SDL_OutOfMemory();
-                    }
-                    output[0] = '\0';
-
-                    outputfp = fdopen(fd_pipe[0], "r");
-                    if (outputfp == NULL) {
-                        SDL_free(output);
-                        close(fd_pipe[0]);
-                        return SDL_SetError("Couldn't open pipe for reading: %s", strerror(errno));
-                    }
-                    tmp = fgets(output, output_len + 1, outputfp);
-                    (void)fclose(outputfp);
-
-                    if ((tmp == NULL) || (*tmp == '\0') || (*tmp == '\n')) {
-                        SDL_free(output);
-                        return 0; /* User simply closed the dialog */
-                    }
-
-                    /* It likes to add a newline... */
-                    tmp = SDL_strrchr(output, '\n');
-                    if (tmp != NULL) {
-                        *tmp = '\0';
-                    }
-
-                    /* Check which button got pressed, in YAD this is the exit code */
                     *buttonid = status;
 
-                    SDL_free(output);
                     return 0; /* success! */
                 } else {
                     return SDL_SetError("yad reported error or failed to launch: %d", WEXITSTATUS(status));
