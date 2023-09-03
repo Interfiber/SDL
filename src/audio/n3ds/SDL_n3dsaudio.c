@@ -176,7 +176,7 @@ static int N3DSAUDIO_OpenDevice(SDL_AudioDevice *device)
     return 0;
 }
 
-static void N3DSAUDIO_PlayDevice(SDL_AudioDevice *device, const Uint8 *buffer, int buflen)
+static int N3DSAUDIO_PlayDevice(SDL_AudioDevice *device, const Uint8 *buffer, int buflen)
 {
     contextLock(device);
 
@@ -185,7 +185,7 @@ static void N3DSAUDIO_PlayDevice(SDL_AudioDevice *device, const Uint8 *buffer, i
     if (device->hidden->isCancelled ||
         device->hidden->waveBuf[nextbuf].status != NDSP_WBUF_FREE) {
         contextUnlock(device);
-        return;
+        return 0;  // !!! FIXME: is this a fatal error? If so, this should return -1.
     }
 
     device->hidden->nextbuf = (nextbuf + 1) % NUM_BUFFERS;
@@ -196,6 +196,8 @@ static void N3DSAUDIO_PlayDevice(SDL_AudioDevice *device, const Uint8 *buffer, i
     DSP_FlushDataCache(device->hidden->waveBuf[nextbuf].data_vaddr, buflen);
 
     ndspChnWaveBufAdd(0, &device->hidden->waveBuf[nextbuf]);
+
+    return 0;
 }
 
 static void N3DSAUDIO_WaitDevice(SDL_AudioDevice *device)
