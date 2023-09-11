@@ -27,7 +27,7 @@
 #include "SDL_coreaudio.h"
 #include "../../thread/SDL_systhread.h"
 
-#define DEBUG_COREAUDIO 1
+#define DEBUG_COREAUDIO 0
 
 #if DEBUG_COREAUDIO
     #define CHECK_RESULT(msg) \
@@ -876,12 +876,12 @@ static int COREAUDIO_OpenDevice(SDL_AudioDevice *device)
         switch (test_format) {
         case SDL_AUDIO_U8:
         case SDL_AUDIO_S8:
-        case SDL_AUDIO_S16LSB:
-        case SDL_AUDIO_S16MSB:
-        case SDL_AUDIO_S32LSB:
-        case SDL_AUDIO_S32MSB:
-        case SDL_AUDIO_F32LSB:
-        case SDL_AUDIO_F32MSB:
+        case SDL_AUDIO_S16LE:
+        case SDL_AUDIO_S16BE:
+        case SDL_AUDIO_S32LE:
+        case SDL_AUDIO_S32BE:
+        case SDL_AUDIO_F32LE:
+        case SDL_AUDIO_F32BE:
             break;
 
         default:

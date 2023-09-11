@@ -143,7 +143,7 @@ static void skip_audio(float amount)
 
     SDL_LockAudioStream(stream);
 
-    speed = SDL_GetAudioStreamSpeed(stream);
+    speed = SDL_GetAudioStreamFrequencyRatio(stream);
     SDL_GetAudioStreamFormat(stream, NULL, &dst_spec);
 
     /* Gimme that crunchy audio */
@@ -151,7 +151,7 @@ static void skip_audio(float amount)
     new_spec.channels = 1;
     new_spec.freq = 4000;
 
-    SDL_SetAudioStreamSpeed(stream, 100.0f);
+    SDL_SetAudioStreamFrequencyRatio(stream, 100.0f);
     SDL_SetAudioStreamFormat(stream, NULL, &new_spec);
 
     num_frames = (int)(new_spec.freq * ((speed * amount) / 100.0f));
@@ -163,7 +163,7 @@ static void skip_audio(float amount)
     }
 
     SDL_SetAudioStreamFormat(stream, NULL, &dst_spec);
-    SDL_SetAudioStreamSpeed(stream, speed);
+    SDL_SetAudioStreamFrequencyRatio(stream, speed);
 
     SDL_UnlockAudioStream(stream);
 
@@ -180,12 +180,12 @@ static const char *AudioFmtToString(const SDL_AudioFormat fmt)
         #define FMTCASE(x) case SDL_AUDIO_##x: return #x
         FMTCASE(U8);
         FMTCASE(S8);
-        FMTCASE(S16LSB);
-        FMTCASE(S16MSB);
-        FMTCASE(S32LSB);
-        FMTCASE(S32MSB);
-        FMTCASE(F32LSB);
-        FMTCASE(F32MSB);
+        FMTCASE(S16LE);
+        FMTCASE(S16BE);
+        FMTCASE(S32LE);
+        FMTCASE(S32BE);
+        FMTCASE(F32LE);
+        FMTCASE(F32BE);
         #undef FMTCASE
     }
     return "?";
@@ -287,12 +287,12 @@ static void loop(void)
 
     if (sliders[0].changed) {
         sliders[0].changed = SDL_FALSE;
-        SDL_SetAudioStreamSpeed(stream, sliders[0].value);
+        SDL_SetAudioStreamFrequencyRatio(stream, sliders[0].value);
     }
 
     if (SDL_GetAudioStreamFormat(stream, &src_spec, &dst_spec) == 0) {
         available_bytes = SDL_GetAudioStreamAvailable(stream);
-        available_seconds = (float)available_bytes / (float)(SDL_AUDIO_BITSIZE(dst_spec.format) / 8 * dst_spec.freq * dst_spec.channels);
+        available_seconds = (float)available_bytes / (float)(SDL_AUDIO_FRAMESIZE(dst_spec) * dst_spec.freq);
 
         /* keep it looping. */
         if (auto_loop && (available_seconds < 10.0f)) {

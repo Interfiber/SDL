@@ -157,7 +157,7 @@ typedef struct SDL_AudioDriver
     SDL_AtomicInt shutting_down;  // non-zero during SDL_Quit, so we known not to accept any last-minute device hotplugs.
 } SDL_AudioDriver;
 
-typedef struct SDL_AudioQueue SDL_AudioQueue;
+struct SDL_AudioQueue; // forward decl.
 
 struct SDL_AudioStream
 {
@@ -170,9 +170,9 @@ struct SDL_AudioStream
 
     SDL_AudioSpec src_spec;
     SDL_AudioSpec dst_spec;
-    float speed;
+    float freq_ratio;
 
-    SDL_AudioQueue* queue;
+    struct SDL_AudioQueue* queue;
 
     SDL_bool track_changed;
     Sint64 resample_offset;
@@ -213,6 +213,12 @@ struct SDL_LogicalAudioDevice
 
     // SDL_TRUE if device was opened with SDL_OpenAudioDeviceStream (so it forbids binding changes, etc).
     SDL_bool simplified;
+
+    // If non-NULL, callback into the app that lets them access the final postmix buffer.
+    SDL_AudioPostmixCallback postmix;
+
+    // App-supplied pointer for postmix callback.
+    void *postmix_userdata;
 
     // double-linked list of opened devices on the same physical device.
     SDL_LogicalAudioDevice *next;
@@ -264,6 +270,7 @@ struct SDL_AudioDevice
     // Scratch buffers used for mixing.
     Uint8 *work_buffer;
     Uint8 *mix_buffer;
+    float *postmix_buffer;
 
     // Size of work_buffer (and mix_buffer) in bytes.
     int work_buffer_size;
